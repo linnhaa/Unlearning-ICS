@@ -70,9 +70,15 @@ def load_train_data(
             raise SystemExit(
                 "Unable to find SWAT train dataset. Did you request the dataset and process it?"
             )
+
         sensor_cols = [
             col for col in df_train.columns if col not in ["Timestamp", "Normal/Attack"]
         ]
+
+        drop_cols = ["LIT101", "MV301", "MV302", "P301", "AT502", "AT504", "PIT502"]
+        df_train = df_train.drop(columns=drop_cols, errors="ignore")  # pandas
+        sensor_cols = [c for c in sensor_cols if c not in drop_cols]
+
 
     elif dataset_name == "SWAT-CLEAN":
         try:
@@ -116,6 +122,7 @@ def load_train_data(
             raise SystemExit(
                 "Unable to find WADI train dataset. Did you request the dataset and process it?"
             )
+        print(len(df_train.columns.to_list()))
         remove_list = [
             "Row",
             "Date",
@@ -126,8 +133,20 @@ def load_train_data(
             "2_LS_002_AL",
             "2_P_001_STATUS",
             "2_P_002_STATUS",
+            "1_AIT_003_PV",
+            "2_LS_201_AH",
+            "2_LS_401_AH",
+            "2A_AIT_002_PV",
+            "3_AIT_003_PV",
+            "3_AIT_004_PV"
+
         ]
         sensor_cols = [col for col in df_train.columns if col not in remove_list]
+        with open('column_name.txt', "a", encoding="utf-8") as f:
+
+            for (i, col_name) in enumerate(sensor_cols):
+                f.write(f"{i} - {col_name}\n")
+            
 
     elif dataset_name == "WADI-CLEAN":
         try:
@@ -204,7 +223,7 @@ def load_test_data(dataset_name, scaler=None, no_transform=False, verbose=False)
     if dataset_name == "BATADAL":
         try:
             df_test = pd.read_csv(
-                "data/" + dataset_name + "/test_dataset_1.csv",
+                "data/" + dataset_name + "/test_dataset_2.csv",
                 parse_dates=["DATETIME"],
                 dayfirst=True,
             )
@@ -224,7 +243,7 @@ def load_test_data(dataset_name, scaler=None, no_transform=False, verbose=False)
         sensor_cols = [c for c in sensor_cols if c not in drop_cols]
     elif dataset_name == "SWAT":
         try:
-            df_test = pd.read_csv("data/" + dataset_name + "/SWATv0_test.csv")
+            df_test = pd.read_csv("data/" + dataset_name + "/SWATv0_test1.csv")
         except FileNotFoundError:
             raise SystemExit(
                 "Unable to find SWAT test dataset. Did you request the dataset and process it?"
@@ -233,6 +252,9 @@ def load_test_data(dataset_name, scaler=None, no_transform=False, verbose=False)
             col for col in df_test.columns if col not in ["Timestamp", "Normal/Attack"]
         ]
         target_col = "Normal/Attack"
+        drop_cols = ["LIT101", "MV301", "MV302", "P301", "AT502", "AT504", "PIT502"]
+        df_test = df_test.drop(columns=drop_cols, errors="ignore")  # pandas
+        sensor_cols = [c for c in sensor_cols if c not in drop_cols]
 
     elif dataset_name == "SWAT-CLEAN":
         try:
@@ -286,6 +308,13 @@ def load_test_data(dataset_name, scaler=None, no_transform=False, verbose=False)
             "2_LS_002_AL",
             "2_P_001_STATUS",
             "2_P_002_STATUS",
+            "1_AIT_003_PV",
+            "2_LS_201_AH",
+            "2_LS_401_AH",
+            "2A_AIT_002_PV",
+            "3_AIT_003_PV",
+            "3_AIT_004_PV"
+
         ]
         sensor_cols = [col for col in df_test.columns if col not in remove_list]
         target_col = "Attack"
@@ -345,5 +374,3 @@ def load_test_data(dataset_name, scaler=None, no_transform=False, verbose=False)
     Ytest = df_test[target_col]
 
     return Xtest.values, Ytest.values, Xtest.columns
-
-
